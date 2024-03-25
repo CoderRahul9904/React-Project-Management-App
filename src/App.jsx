@@ -2,17 +2,65 @@ import { useState, useRef } from "react";
 import ProjectCard from "./components/ProjectCard";
 import SideBar from "./components/sideBar";
 import InitialUI from "./components/InitialUI";
+import SelectedProject from "./components/SelectedProject";
 function App() {
   const[NewProject, SetNewProject]=useState({
     projects:[],
-    SettingProject: undefined
+    SettingProject: undefined,
+    SettingTask: [],
   })
-  // const[AddTitle,SetAddTitle]=useState(null)
+  function handleSelectedProject(id){
+    SetNewProject((prev) => {
+      return {
+        ...prev,
+        SettingProject: id,
+      }
+    })
+  }
   function handleClick(){
     SetNewProject((prev) => {
       return {
         ...prev,
         SettingProject:null
+      }
+    })
+  }
+  function handleDelete(){
+    SetNewProject((prevState) => {
+      return {
+        ...prevState,
+        projects: prevState.projects.filter((project) => project.id !== prevState.SettingProject),
+        SettingProject: undefined
+      }
+    })
+  }
+  function handleAddingTask(Task){
+    SetNewProject((prevData) =>{
+      const taskId=Math.random()
+      const newTask={
+        projectId: prevData.SettingProject,
+        text: Task,
+        id: taskId,
+      };
+      return{
+        ...prevData, 
+        SettingTask:[...prevData.SettingTask, newTask]
+      }
+    })
+  }
+  function handleDeleteTask(){
+    SetNewProject((prev) => {
+      return {
+        ...prev,
+        
+      }
+    })
+  }
+  function handleCancel(){
+    SetNewProject((prev) => {
+      return {
+        ...prev,
+        SettingProject:undefined
       }
     })
   }
@@ -29,15 +77,19 @@ function App() {
       }
     })
   }
-  let content;
+  const selectedProject = NewProject.projects.find(project => project.id === NewProject.SettingProject);
+
+  let content=<SelectedProject  onAddTask={NewProject.SettingTask} onTask={handleAddingTask} onDelete={handleDelete} project={selectedProject}/>
+
   if(NewProject.SettingProject===null){
-    content=<ProjectCard onAdd={handleAddProject}/>
+    content=<ProjectCard onCancel={handleCancel} onAdd={handleAddProject}/>
   }else if(NewProject.SettingProject===undefined){
     content=<InitialUI onSelect={handleClick}/>
   }
+  
   return (
     <div className="flex justify-start">
-      <SideBar addProject={NewProject.projects} onSelect={handleClick}/>
+      <SideBar addProject={NewProject.projects} onSelect={handleClick} onSelectProject={handleSelectedProject} selectedProjectId={selectedProject}/>
       {content}
     </div >
   );
